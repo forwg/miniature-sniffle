@@ -1,52 +1,222 @@
-# Prerequisites
-*.d
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define len sizeof(shop)
+typedef struct Shoppingltem {
+	char name[50];
+	int quantity;
+	struct Shoppingltem* next;
+}shop;
+shop* shoppinglist = NULL;
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+void addItem(char itemName[], int itemQuantity);
+void removeItem(char itemName[]);
+void displaylist();
+void updatequantity(char itemName[], int newltemQuantity);
+void clearlist();
+int totalquantity();
+void findItem(char itemName[]);
+void sortlist();
+void mergelists(shop** list1, shop** list2);
+void deleteitem(char itemName[], int deleteAll);
 
-# Linker output
-*.ilk
-*.map
-*.exp
+int main() {
+	printf("1:添加商品到购物清单	2:从购物清单中移除商品\n");
+	printf("3:查看购物清单          4:修改购物清单中商品数量\n");
+	printf("5:清空购物清单          6:计算购物清单中的商品的总数量\n");
+	printf("7:查找购物清单中的商品  8:排序购物商品\n");
+	printf("9:合并购物清单          10:删除购物清单的商品\n");
+	int n;
+	char names[50];
+	int price;
+	printf("请输入操作数(输入“0”结束）：");
+	while (scanf("%d", &n) && n != 0) {
+		if (n == 0)return 0;
+		if (n == 1) {
+			printf("请分别输入商品名称和价格：");
+			scanf("%s %d", names, &price);
+			addItem(names, price);
+		}
+		else if (n == 2) {
+			printf("请输入需要删除的商品名：");
+			scanf("%s", names);
+			removeItem(names);
+		}
+		else if (n == 3) {
+			displaylist();
+		}
+		else if (n == 4) {
+			printf("请分别输入需要修改的商品和价格：");
+			scanf("%s %d", names, &price);
+			updatequantity(names, price);
+		}
+		else if (n == 5) {
+			clearlist();
+		}
+		else if (n == 6) {
+			printf("购物清单商品总数量为：%d", totalquantity());
+		}
+		else if (n == 7) {
+			printf("请输入购物清单中的商品：");
+			scanf("%s", names);
+			findItem(names);
+		}
+		else if (n == 8) {
+			sortlist();
+			printf("排序成功！");
+		}
+		else if (n == 9) {
+			printf("暂时无法使用，但代码附下，可以查看！！！");
+		}
+		else if (n == 10) {
+			printf("请输入需要删除的商品：");
+			scanf("%s", names);
+			printf("\n请输入‘11’或‘12’需要分别选择删除单个还是全部：");
+			int s;
+			scanf("%d", &s);
+			if (s == 11) {
+				deleteitem(names, 0);
+			}
+			else {
+				deleteitem(names, 1);
+			}
+		}
+		else {
+			printf("请输入1到10直接的操作数！！！");
+			continue;
+		}
+		printf("\n请输入操作数(输入“0”结束）：");
+	}
+};
+void addItem(char itemName[], int itemQuantity) {
+	shop* newltem = (shop*)malloc(len);
+	newltem->next=NULL;
+	strcpy(newltem->name, itemName);
+	newltem->quantity = itemQuantity;
+	if (shoppinglist == NULL) {
+		shoppinglist = newltem;
+	}
+	else {
+		newltem->next = shoppinglist;
+		shoppinglist = newltem;
+	}
+}
+void removeItem(char itemName[]) {
+	shop* current = shoppinglist;
+	shop* previous = NULL;
+	while (current != NULL) {
+		if (strcmp(current->name, itemName) == 0) {
+			if (previous != NULL) {
+				previous->next = current->next;
+			}
+			else {
+				shoppinglist = current->next;
+			}
+			free(current);
+			break;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+void displaylist() {
+	shop* current = shoppinglist;
+	printf("\n购物清单：\n");
+	while (current != NULL) {
+		printf("%s -数量: %d\n", current->name, current->quantity);
+		current = current->next;
+	}
+}
+void updatequantity(char itemName[], int newltemQuantity) {
+	shop* current = shoppinglist;
+	while (current != NULL) {
+		if (strcmp(current->name, itemName) == 0) {
+			current->quantity = newltemQuantity;
+			break;
+		}
+		current = current->next;
+	}
+}
+void clearlist() {
+	shop* temp;
+	while (shoppinglist != NULL) {
+		temp = shoppinglist;
+		shoppinglist = shoppinglist->next;
+		free(temp);
+	}
+}
+int totalquantity() {
+	shop* current = shoppinglist;
+	int total = 0;
+	while (current != NULL) {
+		total += current->quantity;
+		current = current->next;
+	}
+	return total;
+}
+void findItem(char itemName[]) {
+	shop* current = shoppinglist;
+	printf("查找商品;%s\n", itemName);
+	while (current != NULL) {
+		if (strcmp(current->name, itemName) == 0) {
+			printf("%s - 数量：%d\n", current->name, current->quantity);
+			return;
+		}
+		current = current->next;
+	}
+	printf("未找到商品：%s\n", itemName);
+}
+void sortlist() {
+	shop* current = shoppinglist;
+	shop* nextitem = NULL;
+	char tempName[50];
+	int tempQuantity;
+	while (current != NULL) {
+		nextitem = current->next;
+		while (nextitem != NULL) {
+			if (strcmp(current->name, nextitem->name) > 0) {
+				strcpy(tempName, current->name);
+				strcpy(current->name, nextitem->name);
+				strcpy(nextitem->name, tempName);
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+				tempQuantity = current->quantity;
+				current->quantity = nextitem->quantity;
+				nextitem->quantity = tempQuantity;
+			}
+			nextitem = nextitem->next;
+		}
+		current = current->next;
+	}
+}
+void mergelists(shop** list1, shop** list2) {
+	shop* current = *list1;
+	while (current->next != NULL) {
+		current = current->next;
+	}
+	current->next = *list2;
+	*list2 = NULL;
+}
+void deleteitem(char itemName[], int deleteAll) {
+	shop* current = shoppinglist;
+	shop* prev = NULL;
+	while (current != NULL) {
+		if (strcmp(current->name, itemName) == 0) {
+			if (prev == NULL) {
+				shop* temp = shoppinglist;
+				shoppinglist = shoppinglist->next;
+				free(temp);
+				if (!deleteAll)break;
+			}
+			else {
+				prev->next = current->next;
+				free(current);
+				current = prev->next;
+				if (!deleteAll)break;
+			}
+		}
+		else {
+			prev = current;
+			current = current->next;
+		}
+	}
+}
